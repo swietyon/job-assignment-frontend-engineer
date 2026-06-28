@@ -1,4 +1,4 @@
-export default function Profile() {
+export default function Profile(): JSX.Element {
   return (
     <>
       <nav className="navbar navbar-light">

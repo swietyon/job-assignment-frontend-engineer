@@ -1,4 +1,4 @@
-export default function Logout() {
+export default function Logout(): JSX.Element {
   return (
     <>
       <nav className="navbar navbar-light">

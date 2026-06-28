@@ -1,4 +1,4 @@
-export default function ArticleList() {
+export default function ArticleList(): JSX.Element {
   return (
     <>
       <nav className="navbar navbar-light">

@@ -9,7 +9,7 @@ import Logout from "./Logout";
 import Profile from "./Profile";
 import Settings from "./Settings";
 
-function App() {
+function App(): JSX.Element {
   return (
     <Router>
       <Switch>

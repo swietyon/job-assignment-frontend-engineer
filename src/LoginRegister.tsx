@@ -1,4 +1,4 @@
-export default function LoginRegister() {
+export default function LoginRegister(): JSX.Element {
   return (
     <>
       <nav className="navbar navbar-light">

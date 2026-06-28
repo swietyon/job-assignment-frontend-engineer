@@ -1,4 +1,4 @@
-export default function Settings() {
+export default function Settings(): JSX.Element {
   return (
     <>
       <nav className="navbar navbar-light">
