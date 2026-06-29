@@ -4,5 +4,5 @@ export const ROUTES = {
   LOGOUT: "/logout",
   EDITOR: "/editor/:slug?",
   PROFILE: "/profile/:username",
-  ARTICLE: "/:slug",
+  ARTICLE: "/articles/:slug",
 } as const;

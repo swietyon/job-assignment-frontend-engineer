@@ -1,6 +1,7 @@
 import { useAuth } from "context/AuthContext";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import FollowButton from "components/FollowButton";
 
 type Profile = {
   username: string;
@@ -9,31 +10,43 @@ type Profile = {
   following: boolean;
 };
 
+const API_BASE = "http://localhost:3000/api";
+const INFO_TIMEOUT_MS = 3000;
+
 export default function Profile(): JSX.Element {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
+
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [followersCount, setFollowersCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
+
+  const isOwnProfile = user?.username === username;
+  const infoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchProfile = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        const res = await fetch(`http://localhost:3000/api/profiles/${username}`, {
+        const res = await fetch(`${API_BASE}/profiles/${username}`, {
+          signal: controller.signal,
           headers: user ? { Authorization: `Token ${user.token}` } : {},
         });
+
         const data = await res.json().catch(() => null);
+
         if (res.ok) {
           setProfile(data.profile);
-          // initialize followers count if provided by API
-          setFollowersCount(typeof data.profile.followersCount === "number" ? data.profile.followersCount : 0);
         } else {
           setError("Failed to load profile.");
         }
-      } catch {
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
         setError("Network error.");
       } finally {
         setLoading(false);
@@ -41,7 +54,55 @@ export default function Profile(): JSX.Element {
     };
 
     fetchProfile();
+
+    return () => {
+      controller.abort();
+    };
   }, [user, username]);
+
+  // Cleanup info timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (infoTimeoutRef.current) {
+        clearTimeout(infoTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const updateFollowStatus = async (method: "POST" | "DELETE") => {
+    if (!user) return;
+
+    const controller = new AbortController();
+
+    try {
+      const res = await fetch(`${API_BASE}/profiles/${username}/follow`, {
+        method,
+        signal: controller.signal,
+        headers: { Authorization: `Token ${user.token}` },
+      });
+
+      if (res.ok) {
+        setProfile((prev) => (prev ? { ...prev, following: !prev.following } : prev));
+      } else {
+        setError("Failed to update follow status.");
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      setError("Network error.");
+    }
+  };
+
+  const handleFollow = () => updateFollowStatus("POST");
+  const handleUnfollow = () => updateFollowStatus("DELETE");
+
+  const handleRestrictedAction = () => {
+    if (infoTimeoutRef.current) {
+      clearTimeout(infoTimeoutRef.current);
+    }
+
+    setShowInfo(true);
+    infoTimeoutRef.current = setTimeout(() => setShowInfo(false), INFO_TIMEOUT_MS);
+  };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
   if (error) return <p className="text-center mt-10 text-red-600">{error}</p>;
@@ -51,6 +112,7 @@ export default function Profile(): JSX.Element {
     <div className="min-h-auto bg-slate-50 py-12">
       <div className="max-w-3xl mx-auto px-4">
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
+
           <div className="bg-slate-900 px-8 py-10 text-center">
             {profile.image ? (
               <img
@@ -67,48 +129,37 @@ export default function Profile(): JSX.Element {
 
           <div className="space-y-6 px-8 py-8 sm:px-10">
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
-              <p className="mt-2 text-md font-semibold text-slate-900">Name</p>
+              <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Name</p>
               <p className="mt-2 text-slate-600">{profile.username}</p>
             </div>
 
             {profile.bio && (
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
                 <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">About</p>
-                <p className="mt-2 text-slate-600">{profile.bio || "User has not added a bio yet."}</p>
+                <p className="mt-2 text-slate-600">{profile.bio}</p>
               </div>
             )}
 
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
               <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">Following</p>
-                <div className="mt-2 flex items-center gap-4">
-                  <p className="text-md font-semibold text-slate-900">{followersCount}</p>
-                  <button
-                    onClick={async () => {
-                      if (!user) return setError("You must be logged in to follow users.");
-                      const method = profile.following ? "DELETE" : "POST";
-                      try {
-                        const res = await fetch(`http://localhost:3000/api/profiles/${username}/follow`, {
-                          method,
-                          headers: { Authorization: `Token ${user.token}` },
-                        });
-                        if (res.ok) {
-                          // toggle following and update count
-                          setProfile(p => (p ? { ...p, following: !p.following } : p));
-                          setFollowersCount(c => (profile.following ? c - 1 : c + 1));
-                        } else {
-                          setError("Failed to update follow status.");
-                        }
-                      } catch {
-                        setError("Network error.");
-                      }
-                    }}
-                    className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
-                  >
-                    {profile.following ? "Unfollow" : "Follow"}
-                  </button>
-                </div>
+              <div className="mt-4 flex justify-center">
+                <FollowButton
+                  following={profile.following}
+                  isOwnProfile={isOwnProfile}
+                  isLoggedIn={!!user}
+                  onFollow={handleFollow}
+                  onUnfollow={handleUnfollow}
+                  onRestrictedAction={handleRestrictedAction}
+                />
+              </div>
+              {showInfo && (
+                <p className="mt-3 text-center text-sm text-slate-500">
+                  {isOwnProfile ? "You cannot follow yourself." : "Log in to follow users."}
+                </p>
+              )}
             </div>
           </div>
+
         </div>
       </div>
     </div>
