@@ -2,6 +2,7 @@ import { useAuth } from "context/AuthContext";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import FollowButton from "components/FollowButton";
+import ArticleList from "components/ArticleList"; // <-- Dodany import
 
 type Profile = {
   username: string;
@@ -111,6 +112,7 @@ export default function Profile(): JSX.Element {
   return (
     <div className="min-h-auto bg-slate-50 py-12">
       <div className="max-w-3xl mx-auto px-4">
+        {/* Karta informacyjna profilu */}
         <div className="overflow-hidden rounded-3xl bg-white shadow-xl ring-1 ring-slate-200">
 
           <div className="bg-slate-900 px-8 py-10 text-center">
@@ -158,6 +160,11 @@ export default function Profile(): JSX.Element {
                 </p>
               )}
             </div>
+                    {username && (
+          <div className="mt-8 bg-white rounded-3xl shadow-xl ring-1 ring-slate-200 overflow-hidden">
+            <ArticleList author={username} />
+          </div>
+        )}
           </div>
 
         </div>
