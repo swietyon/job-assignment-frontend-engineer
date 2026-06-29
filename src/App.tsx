@@ -12,7 +12,7 @@ import { ROUTES } from "./routes";
 
 interface RouteConfig {
   path: string;
-  component: React.ComponentType<unknown>;
+  component: React.ComponentType<any>;
   exact?: boolean;
 }
 
@@ -33,14 +33,14 @@ function App(): JSX.Element {
       <main className="py-8 bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 bg-white rounded-lg shadow-md p-6">
           <Switch>
-            {APP_ROUTES.map((route) => (
-              <Route
-                key={route.path}
-                path={route.path}
-                exact={route.exact}
-                component={route.component}
-              />
-            ))}
+            {APP_ROUTES.map(route => {
+              const Component = route.component;
+              return (
+                <Route key={route.path} path={route.path} exact={route.exact}>
+                  <Component />
+                </Route>
+              );
+            })}
           </Switch>
         </div>
       </main>

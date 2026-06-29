@@ -44,7 +44,7 @@ export default function LoginRegister(): JSX.Element {
       if (res.ok) {
         login(data.user);
         setSuccessToken(data.user.token);
-        setTimeout(() => history.push("/"), 2000);
+        setTimeout(() => history.push("/"), 1000);
       } else if (res.status === 401 || res.status === 422) {
         if (data?.errors) {
           setServerErrors(data);
