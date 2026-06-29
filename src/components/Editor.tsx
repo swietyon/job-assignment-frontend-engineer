@@ -1,82 +1,89 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { findArticle } from "../data/articles";
+import React, { useState } from "react";
 
 export default function Editor(): JSX.Element {
-  const { slug } = useParams<{ slug?: string }>();
-  const article = findArticle(slug);
-  const [title, setTitle] = useState(article.title);
-  const [description, setDescription] = useState(article.description);
-  const [body, setBody] = useState(article.body);
-  const [tags, setTags] = useState(article.tags.join(", "));
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [body, setBody] = useState("");
+  const [tags, setTags] = useState("");
+
+  const publish = () => {
+    const tagList = tags
+      .split(",")
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+
+    const payload = {
+      article: {
+        title,
+        description,
+        body,
+        tagList,
+      },
+    };
+
+    console.log(JSON.stringify(payload, null, 2));
+    
+    // Clear fields after publishing
+    setTitle("");
+    setDescription("");
+    setBody("");
+    setTags("");
+  };
 
   return (
-    <div>
-      <div>
-        <h1>
-          {slug ? "Edit Article" : "New Article"}
-        </h1>
-        <p>
-          {slug ? "Update your post below." : "Share something worth reading."}
-        </p>
-      </div>
-
-      <div>
-        <div>
-          <label>
-            Title
-          </label>
-          <input
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Article title"
-            type="text"
-            value={title}
-          />
-        </div>
-
-        <div>
-          <label>
-            Description
-          </label>
-          <input
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="What's this article about?"
-            type="text"
-            value={description}
-          />
-        </div>
-
-        <div>
-          <label>
-            Content
-          </label>
-          <textarea
-            onChange={(e) => setBody(e.target.value)}
-            placeholder="Write your article…"
-            rows={10}
-            value={body}
-          />
-        </div>
-
-        <div>
-          <label>
-            Tags
-          </label>
-          <input
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="tag1, tag2, tag3"
-            type="text"
-            value={tags}
-          />
-          <p>Separate tags with commas.</p>
-        </div>
-
-        <div>
-          <button type="button">
-            Publish Article
-          </button>
+    <>
+      <div className="editor-page">
+        <div className="container page">
+          <div className="row">
+            <div className="col-md-10 offset-md-1 col-xs-12">
+              <form>
+                <fieldset>
+                  <fieldset className="form-group">
+                    <input
+                      type="text"
+                      className="form-control form-control-lg"
+                      placeholder="Article Title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                    />
+                  </fieldset>
+                  <fieldset className="form-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="What's this article about?"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                    />
+                  </fieldset>
+                  <fieldset className="form-group">
+                    <textarea
+                      className="form-control"
+                      rows={8}
+                      placeholder="Write your article (in markdown)"
+                      value={body}
+                      onChange={(e) => setBody(e.target.value)}
+                    />
+                  </fieldset>
+                  <fieldset className="form-group">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Enter tags (comma separated)"
+                      value={tags}
+                      onChange={(e) => setTags(e.target.value)}
+                    />
+                    <div className="tag-list" />
+                  </fieldset>
+                  <button className="btn btn-lg pull-xs-right btn-primary" type="button" onClick={publish}>
+                    Publish Article
+                  </button>
+                </fieldset>
+              </form>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
