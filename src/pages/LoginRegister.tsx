@@ -6,6 +6,8 @@ type ServerErrors = {
   errors?: Record<string, string[]>;
 };
 
+const API_BASE = "http://localhost:3000/api";
+
 export default function LoginRegister(): JSX.Element {
   const { login } = useAuth();
   const history = useHistory();
@@ -34,7 +36,7 @@ export default function LoginRegister(): JSX.Element {
 
     setSubmitting(true);
     try {
-      const res = await fetch("http://localhost:3000/api/users/login", {
+      const res = await fetch(`${API_BASE}/users/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ user: { email, password } }),

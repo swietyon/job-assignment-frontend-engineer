@@ -12,6 +12,7 @@ import { ROUTES } from "./routes";
 
 interface RouteConfig {
   path: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component: React.ComponentType<any>;
   exact?: boolean;
 }
