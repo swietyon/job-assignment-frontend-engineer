@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import FollowButton from "components/FollowButton";
 import ArticleList from "components/ArticleList"; // <-- Dodany import
 
-type Profile = {
+type ProfileType = {
   username: string;
   bio: string;
   image: string;
@@ -18,7 +18,7 @@ export default function Profile(): JSX.Element {
   const { username } = useParams<{ username: string }>();
   const { user } = useAuth();
 
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<ProfileType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showInfo, setShowInfo] = useState(false);

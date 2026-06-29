@@ -11,7 +11,7 @@ type Author = {
   following: boolean;
 };
 
-type Article = {
+type ArticleType = {
   slug: string;
   title: string;
   description: string;
@@ -34,7 +34,7 @@ type ArticleListProps = {
 export default function ArticleList({ author }: ArticleListProps): JSX.Element {
   const { user } = useAuth();
 
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<ArticleType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [infoUsername, setInfoUsername] = useState<string | null>(null);
