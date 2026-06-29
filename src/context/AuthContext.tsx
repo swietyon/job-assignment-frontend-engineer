@@ -26,7 +26,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }): JSX.E
 const login = (user: User) => {
   setUser(user);
   localStorage.setItem("user", JSON.stringify(user));
-  console.log("✅ Token zapisany w localStorage:", user.token);
 };
 
   const logout = () => {
